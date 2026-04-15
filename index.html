@@ -2,61 +2,62 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Synth1 Patch Visualizer v1.6</title>
+  <title>Synth1 Patch Visualizer v1.7</title>
   <style>
     * { box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; padding: 16px; background: #0f0f0f; color: #e0e0e0; margin: 0; }
     h2 { color: #4fc3f7; margin: 0 0 16px 0; display: flex; justify-content: space-between; align-items: center; }
-   .master-vol { display: flex; align-items: center; gap: 8px; font-size: 14px; }
-   .master-vol input { width: 120px; }
+.master-vol { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.master-vol input { width: 120px; }
 
-   .container { display: flex; gap: 16px; height: calc(100vh - 80px); }
-   .sidebar { width: 300px; display: flex; flex-direction: column; }
-   .main { flex: 1; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
+.container { display: flex; gap: 16px; height: calc(100vh - 80px); }
+.sidebar { width: 300px; display: flex; flex-direction: column; }
+.main { flex: 1; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
 
     #dropzone { border: 2px dashed #4fc3f7; padding: 20px; text-align: center; margin-bottom: 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
     #dropzone.dragover { background: #1a1a1a; border-color: #29b6f6; }
-   .list-header { display: flex; justify-content: space-between; align-items: center; padding: 0 8px 8px 8px; font-size: 12px; color: #999; }
-   .clear-btn { background: #f44336; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; }
-   .clear-btn:hover { background: #d32f2f; }
+.list-header { display: flex; justify-content: space-between; align-items: center; padding: 0 8px 8px 8px; font-size: 12px; color: #999; }
+.clear-btn { background: #f44336; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+.clear-btn:hover { background: #d32f2f; }
     #patchList { flex: 1; overflow-y: auto; background: #1a1a1a; border-radius: 8px; padding: 8px; }
-   .patch-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; margin: 4px 0; background: #252525; border-radius: 4px; cursor: pointer; transition: 0.1s; font-size: 13px; }
-   .patch-item:hover { background: #333; }
-   .patch-item.active { background: #4fc3f7; color: #000; font-weight: bold; }
-   .patch-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-   .patch-loud { font-size: 10px; color: #f44336; margin: 0 6px; }
-   .patch-quiet { font-size: 10px; color: #ffc107; margin: 0 6px; }
-   .delete-btn { background: transparent; border: none; color: #999; cursor: pointer; font-size: 16px; padding: 0 4px; line-height: 1; }
-   .delete-btn:hover { color: #f44336; }
+.patch-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; margin: 4px 0; background: #252525; border-radius: 4px; cursor: pointer; transition: 0.1s; font-size: 13px; }
+.patch-item:hover { background: #333; }
+.patch-item.active { background: #4fc3f7; color: #000; font-weight: bold; }
+.patch-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.patch-loud { font-size: 10px; color: #f44336; margin: 0 6px; }
+.patch-quiet { font-size: 10px; color: #ffc107; margin: 0 6px; }
+.patch-mute { font-size: 10px; color: #9e9e9e; margin: 0 6px; }
+.delete-btn { background: transparent; border: none; color: #999; cursor: pointer; font-size: 16px; padding: 0 4px; line-height: 1; }
+.delete-btn:hover { color: #f44336; }
 
-   .section { background: #1a1a1a; border-radius: 8px; padding: 12px; }
-   .section h3 { margin: 0 0 12px 0; color: #4fc3f7; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.section { background: #1a1a1a; border-radius: 8px; padding: 12px; }
+.section h3 { margin: 0 0 12px 0; color: #4fc3f7; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-    /* オシロスコープ */
-   .oscilloscope { background: #000; border-radius: 4px; padding: 8px; }
+.oscilloscope { background: #000; border-radius: 4px; padding: 8px; }
     #waveCanvas { width: 100%; height: 120px; display: block; }
-   .scope-info { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #999; }
-   .peak-meter { width: 100%; height: 8px; background: #333; border-radius: 4px; margin-top: 4px; overflow: hidden; }
-   .peak-fill { height: 100%; background: linear-gradient(90deg, #4caf50, #ffeb3b, #f44336); transition: width 0.05s; }
+.scope-info { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #999; }
+.peak-meter { width: 100%; height: 8px; background: #333; border-radius: 4px; margin-top: 4px; overflow: hidden; }
+.peak-fill { height: 100%; background: linear-gradient(90deg, #4caf50, #ffeb3b, #f44336); transition: width 0.05s; }
 
-   .param-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
-   .param { background: #252525; padding: 8px; border-radius: 4px; }
-   .param-label { font-size: 11px; color: #999; margin-bottom: 4px; }
-   .param-value { font-size: 13px; font-weight: bold; color: #fff; }
-   .param-bar { height: 4px; background: #333; border-radius: 2px; margin-top: 4px; overflow: hidden; }
-   .param-bar-fill { height: 100%; background: #4fc3f7; transition: width 0.1s; }
+.param-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+.param { background: #252525; padding: 8px; border-radius: 4px; }
+.param-label { font-size: 11px; color: #999; margin-bottom: 4px; }
+.param-value { font-size: 13px; font-weight: bold; color: #fff; }
+.param-value.corrected { color: #ffc107; } /* 補正値を黄色表示 */
+.param-bar { height: 4px; background: #333; border-radius: 2px; margin-top: 4px; overflow: hidden; }
+.param-bar-fill { height: 100%; background: #4fc3f7; transition: width 0.1s; }
 
-   .keyboard { position: relative; height: 100px; user-select: none; background: #000; border-radius: 4px; overflow: hidden; }
-   .key { position: absolute; cursor: pointer; }
-   .white-key { width: 32px; height: 100px; background: #fff; border-right: 1px solid #ddd; z-index: 1; }
-   .white-key.active { background: #4fc3f7; }
-   .black-key { width: 20px; height: 65px; background: #222; z-index: 2; border-radius: 0 0 3px 3px; }
-   .black-key.active { background: #29b6f6; }
+.keyboard { position: relative; height: 100px; user-select: none; background: #000; border-radius: 4px; overflow: hidden; }
+.key { position: absolute; cursor: pointer; }
+.white-key { width: 32px; height: 100px; background: #fff; border-right: 1px solid #ddd; z-index: 1; }
+.white-key.active { background: #4fc3f7; }
+.black-key { width: 20px; height: 65px; background: #222; z-index: 2; border-radius: 0 0 3px 3px; }
+.black-key.active { background: #29b6f6; }
   </style>
 </head>
 <body>
   <h2>
-    Synth1 Patch Visualizer v1.6
+    Synth1 Patch Visualizer v1.7
     <div class="master-vol">
       Master Vol: <input type="range" id="masterVol" min="0" max="100" value="30">
       <span id="masterVolVal">30%</span>
@@ -123,56 +124,6 @@ let patches = [];
 const WAVEFORMS = ['sawtooth','triangle','sine','square'];
 const FILTER_TYPES = ['LP12','LP24','HP12','BP12','Notch'];
 
-// オシロスコープ描画
-const canvas = document.getElementById('waveCanvas');
-const ctx = canvas.getContext('2d');
-canvas.width = canvas.offsetWidth * 2;
-canvas.height = 240;
-ctx.scale(2, 2);
-
-function drawWaveform() {
-  if (!analyser) {
-    requestAnimationFrame(drawWaveform);
-    return;
-  }
-
-  const bufferLength = analyser.frequencyBinCount;
-  const dataArray = new Uint8Array(bufferLength);
-  analyser.getByteTimeDomainData(dataArray);
-
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, canvas.width/2, 120);
-
-  // 波形描画
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = '#4fc3f7';
-  ctx.beginPath();
-
-  const sliceWidth = (canvas.width/2) / bufferLength;
-  let x = 0;
-  for (let i = 0; i < bufferLength; i++) {
-    const v = dataArray[i] / 128.0;
-    const y = v * 60;
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-    x += sliceWidth;
-  }
-  ctx.stroke();
-
-  // ピークレベル計算
-  let peak = 0;
-  for (let i = 0; i < bufferLength; i++) {
-    const v = Math.abs(dataArray[i] - 128);
-    if (v > peak) peak = v;
-  }
-  const db = peak > 0? 20 * Math.log10(peak / 128) : -Infinity;
-  document.getElementById('peakDisplay').textContent = db > -60? db.toFixed(1) + ' dB' : '-∞ dB';
-  document.getElementById('peakFill').style.width = Math.max(0, Math.min(100, (db + 60) * 1.67)) + '%';
-
-  requestAnimationFrame(drawWaveform);
-}
-drawWaveform();
-
 document.getElementById('masterVol').oninput = e => {
   document.getElementById('masterVolVal').textContent = e.target.value + '%';
   if (masterGain) masterGain.gain.value = e.target.value / 100;
@@ -188,7 +139,24 @@ const map = {
   bipolar: v => (v-64) / 63
 };
 
+// 無音パッチ自動補正：0の値を安全な値に変換
+function sanitizePatch(p) {
+  const s = JSON.parse(JSON.stringify(p)); // deep copy
+  const fix = (key, minVal, label) => {
+    if (s[key] === 0) {
+      s[key] = minVal;
+      s._corrected = s._corrected || {};
+      s._corrected[key] = label;
+    }
+  };
+  fix('amp_gain', 64, 'Amp Gain: 0→50%');
+  fix('amp_sustain', 20, 'A.Sustain: 0→16%');
+  fix('filter_env_amount', 64, 'F.Env: 0→Center');
+  return s;
+}
+
 function estimateLoudness(p) {
+  if (p.amp_gain === 0 || p.amp_sustain === 0) return 'mute';
   const gain = p.amp_gain / 127;
   const reso = p.filter_resonance / 127;
   const sus = p.amp_sustain / 127;
@@ -212,35 +180,79 @@ function initAudio() {
   audioContext = new AudioContext();
   masterGain = audioContext.createGain();
   masterGain.gain.value = 0.3;
-
-  // Analyser for オシロスコープ
   analyser = audioContext.createAnalyser();
   analyser.fftSize = 2048;
-
   masterCompressor = audioContext.createDynamicsCompressor();
   masterCompressor.threshold.value = -24;
   masterCompressor.knee.value = 30;
   masterCompressor.ratio.value = 12;
   masterCompressor.attack.value = 0.003;
   masterCompressor.release.value = 0.25;
-
-  // 接続: Synth → Compressor → Analyser → MasterGain → 出力
   masterCompressor.connect(analyser).connect(masterGain).connect(audioContext.destination);
 }
+
+// オシロスコープ描画
+const canvas = document.getElementById('waveCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = canvas.offsetWidth * 2;
+canvas.height = 240;
+ctx.scale(2, 2);
+
+function drawWaveform() {
+  if (!analyser) {
+    requestAnimationFrame(drawWaveform);
+    return;
+  }
+
+  const bufferLength = analyser.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+  analyser.getByteTimeDomainData(dataArray);
+
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, canvas.width/2, 120);
+
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#4fc3f7';
+  ctx.beginPath();
+
+  const sliceWidth = (canvas.width/2) / bufferLength;
+  let x = 0;
+  for (let i = 0; i < bufferLength; i++) {
+    const v = dataArray[i] / 128.0;
+    const y = v * 60;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+    x += sliceWidth;
+  }
+  ctx.stroke();
+
+  let peak = 0;
+  for (let i = 0; i < bufferLength; i++) {
+    const v = Math.abs(dataArray[i] - 128);
+    if (v > peak) peak = v;
+  }
+  const db = peak > 0? 20 * Math.log10(peak / 128) : -Infinity;
+  document.getElementById('peakDisplay').textContent = db > -60? db.toFixed(1) + ' dB' : '-∞ dB';
+  document.getElementById('peakFill').style.width = Math.max(0, Math.min(100, (db + 60) * 1.67)) + '%';
+
+  requestAnimationFrame(drawWaveform);
+}
+drawWaveform();
 
 function visualizeParams(p) {
   const osc = document.getElementById('oscParams');
   const fa = document.getElementById('filterAmpParams');
   const lf = document.getElementById('lfoFxParams');
 
-  const param = (label, val, raw, pct) => `
+  const param = (label, val, raw, pct, corrected) => `
     <div class="param">
       <div class="param-label">${label}</div>
-      <div class="param-value">${val}</div>
+      <div class="param-value ${corrected? 'corrected' : ''}">${val}${corrected? ' *' : ''}</div>
       <div class="param-bar"><div class="param-bar-fill" style="width:${Math.max(0,Math.min(100,pct))}%"></div></div>
     </div>`;
 
   const waveName = v => v===4? 'NOISE' : WAVEFORMS[v] || 'SAW';
+  const c = p._corrected || {};
 
   osc.innerHTML =
     param('OSC1 Wave', waveName(p.osc1_shape), p.osc1_shape, p.osc1_shape/4*100) +
@@ -254,13 +266,13 @@ function visualizeParams(p) {
     param('Filter Type', FILTER_TYPES[p.filter_type]||'LP12', p.filter_type, p.filter_type/4*100) +
     param('Cutoff', Math.round(map.cutoff(p.filter_cutoff))+'Hz', p.filter_cutoff, p.filter_cutoff/127*100) +
     param('Resonance', map.q(p.filter_resonance), p.filter_resonance, p.filter_resonance/127*100) +
-    param('F.Env Amt', (map.bipolar(p.filter_env_amount)*100).toFixed(0)+'%', p.filter_env_amount, p.filter_env_amount/127*100) +
+    param('F.Env Amt', (map.bipolar(p.filter_env_amount)*100).toFixed(0)+'%', p.filter_env_amount, p.filter_env_amount/127*100, c.filter_env_amount) +
     param('F.Attack', map.time(p.filter_attack).toFixed(2)+'s', p.filter_attack, p.filter_attack/127*100) +
     param('F.Sustain', (p.filter_sustain/1.27).toFixed(0)+'%', p.filter_sustain, p.filter_sustain/127*100) +
     param('A.Attack', map.time(p.amp_attack).toFixed(2)+'s', p.amp_attack, p.amp_attack/127*100) +
-    param('A.Sustain', (p.amp_sustain/1.27).toFixed(0)+'%', p.amp_sustain, p.amp_sustain/127*100) +
+    param('A.Sustain', (p.amp_sustain/1.27).toFixed(0)+'%', p.amp_sustain, p.amp_sustain/127*100, c.amp_sustain) +
     param('A.Release', map.time(p.amp_release).toFixed(2)+'s', p.amp_release, p.amp_release/127*100) +
-    param('Amp Gain', (p.amp_gain/1.27).toFixed(0)+'%', p.amp_gain, p.amp_gain/127*100);
+    param('Amp Gain', (p.amp_gain/1.27).toFixed(0)+'%', p.amp_gain, p.amp_gain/127*100, c.amp_gain);
 
   lf.innerHTML =
     param('LFO1 Speed', (p.lfo1_speed/127*20).toFixed(1)+'Hz', p.lfo1_speed, p.lfo1_speed/127*100) +
@@ -300,9 +312,8 @@ function noteOn(freq, noteName) {
   if (!currentPatch || activeNotes.has(noteName)) return;
   initAudio();
   const now = audioContext.currentTime;
-  const p = currentPatch.parameters;
+  const p = sanitizePatch(currentPatch.parameters);
 
-  // 周波数表示更新
   document.getElementById('freqDisplay').textContent = freq.toFixed(1) + ' Hz';
 
   const loudness = estimateLoudness(p);
@@ -449,7 +460,8 @@ function renderPatchList() {
   list.innerHTML = patches.map((p,i) => {
     const loud = estimateLoudness(p.data.parameters);
     const badge = loud === 'loud'? '<span class="patch-loud">LOUD</span>' :
-                  loud === 'quiet'? '<span class="patch-quiet">QUIET</span>' : '';
+                  loud === 'quiet'? '<span class="patch-quiet">QUIET</span>' :
+                  loud === 'mute'? '<span class="patch-mute">MUTE</span>' : '';
     return `<div class="patch-item" data-idx="${i}">
       <span class="patch-name">${p.name}</span>${badge}
       <button class="delete-btn" data-idx="${i}">×</button>
