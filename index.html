@@ -2,56 +2,54 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Synth1 Patch Visualizer v1.4</title>
+  <title>Synth1 Patch Visualizer v1.5</title>
   <style>
     * { box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; padding: 16px; background: #0f0f0f; color: #e0e0e0; margin: 0; }
     h2 { color: #4fc3f7; margin: 0 0 16px 0; display: flex; justify-content: space-between; align-items: center; }
-  .master-vol { display: flex; align-items: center; gap: 8px; font-size: 14px; }
-  .master-vol input { width: 120px; }
+ .master-vol { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+ .master-vol input { width: 120px; }
 
-  .container { display: flex; gap: 16px; height: calc(100vh - 80px); }
-  .sidebar { width: 300px; display: flex; flex-direction: column; }
-  .main { flex: 1; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
+ .container { display: flex; gap: 16px; height: calc(100vh - 80px); }
+ .sidebar { width: 300px; display: flex; flex-direction: column; }
+ .main { flex: 1; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
 
     #dropzone { border: 2px dashed #4fc3f7; padding: 20px; text-align: center; margin-bottom: 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
     #dropzone.dragover { background: #1a1a1a; border-color: #29b6f6; }
-  .list-header { display: flex; justify-content: space-between; align-items: center; padding: 0 8px 8px 8px; font-size: 12px; color: #999; }
-  .clear-btn { background: #f44336; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; }
-  .clear-btn:hover { background: #d32f2f; }
+ .list-header { display: flex; justify-content: space-between; align-items: center; padding: 0 8px 8px 8px; font-size: 12px; color: #999; }
+ .clear-btn { background: #f44336; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+ .clear-btn:hover { background: #d32f2f; }
     #patchList { flex: 1; overflow-y: auto; background: #1a1a1a; border-radius: 8px; padding: 8px; }
-  .patch-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; margin: 4px 0; background: #252525; border-radius: 4px; cursor: pointer; transition: 0.1s; font-size: 13px; }
-  .patch-item:hover { background: #333; }
-  .patch-item.active { background: #4fc3f7; color: #000; font-weight: bold; }
-  .patch-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .patch-loud { font-size: 10px; color: #f44336; margin: 0 6px; }
-  .patch-quiet { font-size: 10px; color: #ffc107; margin: 0 6px; }
-  .delete-btn { background: transparent; border: none; color: #999; cursor: pointer; font-size: 16px; padding: 0 4px; line-height: 1; }
-  .delete-btn:hover { color: #f44336; }
-  .patch-item.active.delete-btn { color: #000; }
-  .patch-item.active.delete-btn:hover { color: #d32f2f; }
+ .patch-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; margin: 4px 0; background: #252525; border-radius: 4px; cursor: pointer; transition: 0.1s; font-size: 13px; }
+ .patch-item:hover { background: #333; }
+ .patch-item.active { background: #4fc3f7; color: #000; font-weight: bold; }
+ .patch-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+ .patch-loud { font-size: 10px; color: #f44336; margin: 0 6px; }
+ .patch-quiet { font-size: 10px; color: #ffc107; margin: 0 6px; }
+ .delete-btn { background: transparent; border: none; color: #999; cursor: pointer; font-size: 16px; padding: 0 4px; line-height: 1; }
+ .delete-btn:hover { color: #f44336; }
 
-  .section { background: #1a1a1a; border-radius: 8px; padding: 12px; }
-  .section h3 { margin: 0 0 12px 0; color: #4fc3f7; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+ .section { background: #1a1a1a; border-radius: 8px; padding: 12px; }
+ .section h3 { margin: 0 0 12px 0; color: #4fc3f7; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-  .param-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
-  .param { background: #252525; padding: 8px; border-radius: 4px; }
-  .param-label { font-size: 11px; color: #999; margin-bottom: 4px; }
-  .param-value { font-size: 13px; font-weight: bold; color: #fff; }
-  .param-bar { height: 4px; background: #333; border-radius: 2px; margin-top: 4px; overflow: hidden; }
-  .param-bar-fill { height: 100%; background: #4fc3f7; transition: width 0.1s; }
+ .param-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+ .param { background: #252525; padding: 8px; border-radius: 4px; }
+ .param-label { font-size: 11px; color: #999; margin-bottom: 4px; }
+ .param-value { font-size: 13px; font-weight: bold; color: #fff; }
+ .param-bar { height: 4px; background: #333; border-radius: 2px; margin-top: 4px; overflow: hidden; }
+ .param-bar-fill { height: 100%; background: #4fc3f7; transition: width 0.1s; }
 
-  .keyboard { position: relative; height: 100px; user-select: none; background: #000; border-radius: 4px; overflow: hidden; }
-  .key { position: absolute; cursor: pointer; }
-  .white-key { width: 32px; height: 100px; background: #fff; border-right: 1px solid #ddd; z-index: 1; }
-  .white-key.active { background: #4fc3f7; }
-  .black-key { width: 20px; height: 65px; background: #222; z-index: 2; border-radius: 0 0 3px 3px; }
-  .black-key.active { background: #29b6f6; }
+ .keyboard { position: relative; height: 100px; user-select: none; background: #000; border-radius: 4px; overflow: hidden; }
+ .key { position: absolute; cursor: pointer; }
+ .white-key { width: 32px; height: 100px; background: #fff; border-right: 1px solid #ddd; z-index: 1; }
+ .white-key.active { background: #4fc3f7; }
+ .black-key { width: 20px; height: 65px; background: #222; z-index: 2; border-radius: 0 0 3px 3px; }
+ .black-key.active { background: #29b6f6; }
   </style>
 </head>
 <body>
   <h2>
-    Synth1 Patch Visualizer v1.4
+    Synth1 Patch Visualizer v1.5
     <div class="master-vol">
       Master Vol: <input type="range" id="masterVol" min="0" max="100" value="30">
       <span id="masterVolVal">30%</span>
@@ -102,9 +100,8 @@ let currentPatch = null;
 const activeNotes = new Map();
 let patches = [];
 
-// Synth1準拠: 0=SAW, 1=TRI, 2=SIN, 3=SQR, 4=NOISE
 const WAVEFORMS = ['sawtooth','triangle','sine','square'];
-const FILTER_TYPES = ['LP12','LP24','HP12','BP','Notch'];
+const FILTER_TYPES = ['LP12','LP24','HP12','BP12','Notch'];
 
 document.getElementById('masterVol').oninput = e => {
   document.getElementById('masterVolVal').textContent = e.target.value + '%';
@@ -207,6 +204,21 @@ function createNoiseSource() {
   return source;
 }
 
+function createFilter(type, freq, q) {
+  const filter = audioContext.createBiquadFilter();
+  switch(type) {
+    case 0: filter.type = 'lowpass'; break; // LP12
+    case 1: filter.type = 'lowpass'; break; // LP24は後で2段目追加
+    case 2: filter.type = 'highpass'; break; // HP12
+    case 3: filter.type = 'bandpass'; break; // BP12
+    case 4: filter.type = 'notch'; break; // Notch
+    default: filter.type = 'lowpass';
+  }
+  filter.frequency.value = freq;
+  filter.Q.value = q;
+  return filter;
+}
+
 function noteOn(freq, noteName) {
   if (!currentPatch || activeNotes.has(noteName)) return;
   initAudio();
@@ -246,19 +258,34 @@ function noteOn(freq, noteName) {
     });
   }
 
-  const filter = audioContext.createBiquadFilter();
-  filter.type = p.filter_type === 2? 'highpass' : p.filter_type === 3? 'bandpass' : p.filter_type === 4? 'notch' : 'lowpass';
-  filter.Q.value = p.filter_resonance / 127 * 20;
+  // Filter Type対応：LP24は2段直列
   const baseCutoff = map.cutoff(p.filter_cutoff);
+  const qVal = p.filter_resonance / 127 * 20;
+  const filter1 = createFilter(p.filter_type, baseCutoff, qVal);
+  const filters = [filter1];
+
+  if (p.filter_type === 1) { // LP24
+    const filter2 = createFilter(p.filter_type, baseCutoff, qVal);
+    filters.push(filter2);
+  }
+
   const egAmt = map.bipolar(p.filter_env_amount) * 8000;
 
   const ampEnv = audioContext.createGain();
   ampEnv.gain.value = 0;
 
-  osc1.connect(osc1Gain).connect(filter);
-  osc2.connect(osc2Gain).connect(filter);
-  unisonOscs.forEach(u => u.connect(filter));
-  filter.connect(ampEnv).connect(masterCompressor);
+  // 接続：OSC → Filter1 → Filter2(あれば) → Amp → Compressor
+  osc1.connect(osc1Gain).connect(filters[0]);
+  osc2.connect(osc2Gain).connect(filters[0]);
+  unisonOscs.forEach(u => u.connect(filters[0]));
+
+  if (filters.length > 1) {
+    filters[0].connect(filters[1]);
+    filters[1].connect(ampEnv);
+  } else {
+    filters[0].connect(ampEnv);
+  }
+  ampEnv.connect(masterCompressor);
 
   const atk = map.time(p.amp_attack);
   const dec = map.time(p.amp_decay);
@@ -271,16 +298,19 @@ function noteOn(freq, noteName) {
   const peakCutoff = Math.max(20, baseCutoff + egAmt);
   const susCutoff = Math.max(20, baseCutoff + egAmt * fsus);
 
-  filter.frequency.setValueAtTime(baseCutoff, now);
-  filter.frequency.linearRampToValueAtTime(peakCutoff, now + fatk);
-  filter.frequency.linearRampToValueAtTime(susCutoff, now + fatk + fdec);
+  // 全Filterに同じEGを適用
+  filters.forEach(f => {
+    f.frequency.setValueAtTime(baseCutoff, now);
+    f.frequency.linearRampToValueAtTime(peakCutoff, now + fatk);
+    f.frequency.linearRampToValueAtTime(susCutoff, now + fatk + fdec);
+  });
 
   ampEnv.gain.setValueAtTime(0, now);
   ampEnv.gain.linearRampToValueAtTime(1, now + atk);
   ampEnv.gain.linearRampToValueAtTime(sus, now + atk + dec);
 
   osc1.start(now); osc2.start(now); unisonOscs.forEach(u=>u.start(now));
-  activeNotes.set(noteName, {osc1,osc2,unisonOscs,filter,ampEnv,baseCutoff,rel,p});
+  activeNotes.set(noteName, {osc1,osc2,unisonOscs,filters,ampEnv,baseCutoff,rel,p});
 }
 
 function noteOff(noteName) {
@@ -288,17 +318,18 @@ function noteOff(noteName) {
   if (!n) return;
   const now = audioContext.currentTime;
   const stopTime = now + n.rel;
-  
-  // Filter Release - 現在値固定してからランプ
-  n.filter.frequency.cancelScheduledValues(now);
-  n.filter.frequency.setValueAtTime(n.filter.frequency.value, now);
-  n.filter.frequency.linearRampToValueAtTime(n.baseCutoff, stopTime);
-  
-  // Amp Release - 現在値固定してからランプ  
+
+  // 全FilterにRelease適用
+  n.filters.forEach(f => {
+    f.frequency.cancelScheduledValues(now);
+    f.frequency.setValueAtTime(f.frequency.value, now);
+    f.frequency.linearRampToValueAtTime(n.baseCutoff, stopTime);
+  });
+
   n.ampEnv.gain.cancelScheduledValues(now);
   n.ampEnv.gain.setValueAtTime(n.ampEnv.gain.value, now);
   n.ampEnv.gain.linearRampToValueAtTime(0, stopTime);
-  
+
   n.osc1.stop(stopTime); n.osc2.stop(stopTime); n.unisonOscs.forEach(u=>u.stop(stopTime));
   activeNotes.delete(noteName);
 }
