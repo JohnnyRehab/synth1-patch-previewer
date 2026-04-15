@@ -15,3 +15,8 @@ This could potentially damage your speakers, so please check at a low volume fir
 +++++ Disclaimer +++++
    Regarding safety, you assume all responsibility.
    I will not be held liable for any damages resulting from use.
+
+
+
+Github Pages
+https://johnnyrehab.github.io/synth1-patch-previewer/
