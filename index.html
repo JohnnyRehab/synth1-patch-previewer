@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Synth1 Patch Visualizer v1.7</title>
+  <title>Synth1 Patch Visualizer v1.8</title>
   <style>
     * { box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; padding: 16px; background: #0f0f0f; color: #e0e0e0; margin: 0; }
@@ -15,8 +15,8 @@
 .main { flex: 1; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
 
     #dropzone { border: 2px dashed #4fc3f7; padding: 20px; text-align: center; margin-bottom: 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
-    #dropzone.dragover { background: #1a1a1a; border-color: #29b6f6; }
-.list-header { display: flex; justify-content: space-between; align-items: center; padding: 0 8px 8px 8px; font-size: 12px; color: #999; }
+    #dropzone.dragover { background: #1a1a; border-color: #29b6f6; }
+.list-header { display: flex; justify-content: space-between; align-items: center; padding: 0 8px 8px; font-size: 12px; color: #999; }
 .clear-btn { background: #f44336; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; }
 .clear-btn:hover { background: #d32f2f; }
     #patchList { flex: 1; overflow-y: auto; background: #1a1a1a; border-radius: 8px; padding: 8px; }
@@ -27,6 +27,7 @@
 .patch-loud { font-size: 10px; color: #f44336; margin: 0 6px; }
 .patch-quiet { font-size: 10px; color: #ffc107; margin: 0 6px; }
 .patch-mute { font-size: 10px; color: #9e9e9e; margin: 0 6px; }
+.patch-fixed { font-size: 10px; color: #4caf50; margin: 0 6px; }
 .delete-btn { background: transparent; border: none; color: #999; cursor: pointer; font-size: 16px; padding: 0 4px; line-height: 1; }
 .delete-btn:hover { color: #f44336; }
 
@@ -43,7 +44,7 @@
 .param { background: #252525; padding: 8px; border-radius: 4px; }
 .param-label { font-size: 11px; color: #999; margin-bottom: 4px; }
 .param-value { font-size: 13px; font-weight: bold; color: #fff; }
-.param-value.corrected { color: #ffc107; } /* 補正値を黄色表示 */
+.param-value.corrected { color: #4caf50; }
 .param-bar { height: 4px; background: #333; border-radius: 2px; margin-top: 4px; overflow: hidden; }
 .param-bar-fill { height: 100%; background: #4fc3f7; transition: width 0.1s; }
 
@@ -57,7 +58,7 @@
 </head>
 <body>
   <h2>
-    Synth1 Patch Visualizer v1.7
+    Synth1 Patch Visualizer v1.8
     <div class="master-vol">
       Master Vol: <input type="range" id="masterVol" min="0" max="100" value="30">
       <span id="masterVolVal">30%</span>
@@ -132,26 +133,42 @@ document.getElementById('masterVol').oninput = e => {
 const map = {
   cutoff: v => Math.max(20, Math.pow(2, v/127*10.3) * 20),
   q: v => v/127*20,
-  time: v => Math.pow(v/127, 2) * 5,
+  time: v => {
+    // Attack長すぎ対策：120以上は0.5秒上限
+    if (v > 120) return 0.5;
+    return Math.pow(v/127, 2) * 5;
+  },
   level: v => v/127,
   detune: v => v-64,
   pitch: v => v-64,
   bipolar: v => (v-64) / 63
 };
 
-// 無音パッチ自動補正：0の値を安全な値に変換
+// 強化版：undefined補完 + 0補正
 function sanitizePatch(p) {
-  const s = JSON.parse(JSON.stringify(p)); // deep copy
-  const fix = (key, minVal, label) => {
-    if (s[key] === 0) {
-      s[key] = minVal;
-      s._corrected = s._corrected || {};
-      s._corrected[key] = label;
-    }
+  const s = JSON.parse(JSON.stringify(p));
+  const defaults = {
+    osc1_shape: 0, osc2_shape: 0, osc_mix: 64,
+    osc1_octave: 2, osc2_octave: 1, osc1_semitone: 0, osc2_semitone: 0,
+    osc2_pitch: 64, osc2_fine_tune: 64,
+    filter_type: 0, filter_cutoff: 127, filter_resonance: 0, filter_env_amount: 64,
+    filter_attack: 0, filter_decay: 64, filter_sustain: 127, filter_release: 0,
+    amp_attack: 0, amp_decay: 64, amp_sustain: 127, amp_release: 20, amp_gain: 100,
+    unison_mode: 0, unison_detune: 0
   };
-  fix('amp_gain', 64, 'Amp Gain: 0→50%');
-  fix('amp_sustain', 20, 'A.Sustain: 0→16%');
-  fix('filter_env_amount', 64, 'F.Env: 0→Center');
+
+  s._corrected = {};
+  Object.keys(defaults).forEach(key => {
+    if (s[key] === undefined) {
+      s[key] = defaults[key];
+      s._corrected[key] = 'undefined→default';
+    }
+  });
+
+  // 0補正：無音になる危険な値
+  if (s.amp_gain === 0) { s.amp_gain = 64; s._corrected.amp_gain = '0→50%'; }
+  if (s.amp_sustain === 0) { s.amp_sustain = 20; s._corrected.amp_sustain = '0→16%'; }
+
   return s;
 }
 
@@ -191,7 +208,6 @@ function initAudio() {
   masterCompressor.connect(analyser).connect(masterGain).connect(audioContext.destination);
 }
 
-// オシロスコープ描画
 const canvas = document.getElementById('waveCanvas');
 const ctx = canvas.getContext('2d');
 canvas.width = canvas.offsetWidth * 2;
@@ -203,18 +219,14 @@ function drawWaveform() {
     requestAnimationFrame(drawWaveform);
     return;
   }
-
   const bufferLength = analyser.frequencyBinCount;
   const dataArray = new Uint8Array(bufferLength);
   analyser.getByteTimeDomainData(dataArray);
-
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, canvas.width/2, 120);
-
   ctx.lineWidth = 2;
   ctx.strokeStyle = '#4fc3f7';
   ctx.beginPath();
-
   const sliceWidth = (canvas.width/2) / bufferLength;
   let x = 0;
   for (let i = 0; i < bufferLength; i++) {
@@ -225,7 +237,6 @@ function drawWaveform() {
     x += sliceWidth;
   }
   ctx.stroke();
-
   let peak = 0;
   for (let i = 0; i < bufferLength; i++) {
     const v = Math.abs(dataArray[i] - 128);
@@ -234,7 +245,6 @@ function drawWaveform() {
   const db = peak > 0? 20 * Math.log10(peak / 128) : -Infinity;
   document.getElementById('peakDisplay').textContent = db > -60? db.toFixed(1) + ' dB' : '-∞ dB';
   document.getElementById('peakFill').style.width = Math.max(0, Math.min(100, (db + 60) * 1.67)) + '%';
-
   requestAnimationFrame(drawWaveform);
 }
 drawWaveform();
@@ -255,31 +265,31 @@ function visualizeParams(p) {
   const c = p._corrected || {};
 
   osc.innerHTML =
-    param('OSC1 Wave', waveName(p.osc1_shape), p.osc1_shape, p.osc1_shape/4*100) +
-    param('OSC2 Wave', waveName(p.osc2_shape), p.osc2_shape, p.osc2_shape/4*100) +
-    param('OSC Mix', (p.osc_mix/1.27).toFixed(0)+'%', p.osc_mix, p.osc_mix/127*100) +
-    param('OSC2 Detune', map.detune(p.osc2_fine_tune)+' cent', p.osc2_fine_tune, p.osc2_fine_tune/127*100) +
-    param('Unison', p.unison_mode? 'On' : 'Off', p.unison_mode, p.unison_mode*100) +
-    param('Uni Detune', p.unison_detune, p.unison_detune, p.unison_detune/127*100);
+    param('OSC1 Wave', waveName(p.osc1_shape), p.osc1_shape, p.osc1_shape/4*100, c.osc1_shape) +
+    param('OSC2 Wave', waveName(p.osc2_shape), p.osc2_shape, p.osc2_shape/4*100, c.osc2_shape) +
+    param('OSC Mix', (p.osc_mix/1.27).toFixed(0)+'%', p.osc_mix, p.osc_mix/127*100, c.osc_mix) +
+    param('OSC2 Detune', map.detune(p.osc2_fine_tune)+' cent', p.osc2_fine_tune, p.osc2_fine_tune/127*100, c.osc2_fine_tune) +
+    param('Unison', p.unison_mode? 'On' : 'Off', p.unison_mode, p.unison_mode*100, c.unison_mode) +
+    param('Uni Detune', p.unison_detune, p.unison_detune, p.unison_detune/127*100, c.unison_detune);
 
   fa.innerHTML =
-    param('Filter Type', FILTER_TYPES[p.filter_type]||'LP12', p.filter_type, p.filter_type/4*100) +
-    param('Cutoff', Math.round(map.cutoff(p.filter_cutoff))+'Hz', p.filter_cutoff, p.filter_cutoff/127*100) +
-    param('Resonance', map.q(p.filter_resonance), p.filter_resonance, p.filter_resonance/127*100) +
+    param('Filter Type', FILTER_TYPES[p.filter_type]||'LP12', p.filter_type, p.filter_type/4*100, c.filter_type) +
+    param('Cutoff', Math.round(map.cutoff(p.filter_cutoff))+'Hz', p.filter_cutoff, p.filter_cutoff/127*100, c.filter_cutoff) +
+    param('Resonance', map.q(p.filter_resonance), p.filter_resonance, p.filter_resonance/127*100, c.filter_resonance) +
     param('F.Env Amt', (map.bipolar(p.filter_env_amount)*100).toFixed(0)+'%', p.filter_env_amount, p.filter_env_amount/127*100, c.filter_env_amount) +
-    param('F.Attack', map.time(p.filter_attack).toFixed(2)+'s', p.filter_attack, p.filter_attack/127*100) +
-    param('F.Sustain', (p.filter_sustain/1.27).toFixed(0)+'%', p.filter_sustain, p.filter_sustain/127*100) +
-    param('A.Attack', map.time(p.amp_attack).toFixed(2)+'s', p.amp_attack, p.amp_attack/127*100) +
+    param('F.Attack', map.time(p.filter_attack).toFixed(2)+'s', p.filter_attack, p.filter_attack/127*100, c.filter_attack) +
+    param('F.Sustain', (p.filter_sustain/1.27).toFixed(0)+'%', p.filter_sustain, p.filter_sustain/127*100, c.filter_sustain) +
+    param('A.Attack', map.time(p.amp_attack).toFixed(2)+'s', p.amp_attack, p.amp_attack/127*100, c.amp_attack) +
     param('A.Sustain', (p.amp_sustain/1.27).toFixed(0)+'%', p.amp_sustain, p.amp_sustain/127*100, c.amp_sustain) +
-    param('A.Release', map.time(p.amp_release).toFixed(2)+'s', p.amp_release, p.amp_release/127*100) +
+    param('A.Release', map.time(p.amp_release).toFixed(2)+'s', p.amp_release, p.amp_release/127*100, c.amp_release) +
     param('Amp Gain', (p.amp_gain/1.27).toFixed(0)+'%', p.amp_gain, p.amp_gain/127*100, c.amp_gain);
 
   lf.innerHTML =
-    param('LFO1 Speed', (p.lfo1_speed/127*20).toFixed(1)+'Hz', p.lfo1_speed, p.lfo1_speed/127*100) +
-    param('LFO1 Depth', (p.lfo1_depth/1.27).toFixed(0)+'%', p.lfo1_depth, p.lfo1_depth/127*100) +
-    param('Delay Time', (p.delay_time/127*1000).toFixed(0)+'ms', p.delay_time, p.delay_time/127*100) +
-    param('Delay Mix', (p.delay_mix/1.27).toFixed(0)+'%', p.delay_mix, p.delay_mix/127*100) +
-    param('Chorus', p.chorus_enable > 64? 'On' : 'Off', p.chorus_enable, p.chorus_enable/127*100);
+    param('LFO1 Speed', (p.lfo1_speed/127*20).toFixed(1)+'Hz', p.lfo1_speed, p.lfo1_speed/127*100, c.lfo1_speed) +
+    param('LFO1 Depth', (p.lfo1_depth/1.27).toFixed(0)+'%', p.lfo1_depth, p.lfo1_depth/127*100, c.lfo1_depth) +
+    param('Delay Time', (p.delay_time/127*1000).toFixed(0)+'ms', p.delay_time, p.delay_time/127*100, c.delay_time) +
+    param('Delay Mix', (p.delay_mix/1.27).toFixed(0)+'%', p.delay_mix, p.delay_mix/127*100, c.delay_mix) +
+    param('Chorus', p.chorus_enable > 64? 'On' : 'Off', p.chorus_enable, p.chorus_enable/127*100, c.chorus_enable);
 }
 
 function createNoiseSource() {
@@ -325,7 +335,10 @@ function noteOn(freq, noteName) {
     osc1.frequency.value = freq * Math.pow(2, ((p.osc1_octave||1)-1) + (p.osc1_semitone||0)/12);
   }
   const osc1Gain = audioContext.createGain();
-  osc1Gain.gain.value = Math.max(0.01, (127 - p.osc_mix) / 127 * (p.amp_gain/127) * autoGain);
+  // NaN対策：??でデフォルト値
+  const mix = p.osc_mix?? 64;
+  const gain = p.amp_gain?? 100;
+  osc1Gain.gain.value = Math.max(0.01, (127 - mix) / 127 * (gain/127) * autoGain);
 
   const osc2 = p.osc2_shape === 4? createNoiseSource() : audioContext.createOscillator();
   if (p.osc2_shape!== 4) {
@@ -334,7 +347,7 @@ function noteOn(freq, noteName) {
     osc2.detune.value = (p.osc2_fine_tune - 64) + (p.osc2_pitch - 64) * 100;
   }
   const osc2Gain = audioContext.createGain();
-  osc2Gain.gain.value = Math.max(0.01, p.osc_mix / 127 * (p.amp_gain/127) * autoGain);
+  osc2Gain.gain.value = Math.max(0.01, mix / 127 * (gain/127) * autoGain);
 
   const unisonOscs = [];
   if (p.unison_mode > 0) {
@@ -459,11 +472,13 @@ function renderPatchList() {
   document.getElementById('patchCount').textContent = `${patches.length} / 10`;
   list.innerHTML = patches.map((p,i) => {
     const loud = estimateLoudness(p.data.parameters);
+    const fixed = p.data.parameters._corrected;
     const badge = loud === 'loud'? '<span class="patch-loud">LOUD</span>' :
                   loud === 'quiet'? '<span class="patch-quiet">QUIET</span>' :
                   loud === 'mute'? '<span class="patch-mute">MUTE</span>' : '';
+    const fixBadge = fixed? '<span class="patch-fixed">FIXED</span>' : '';
     return `<div class="patch-item" data-idx="${i}">
-      <span class="patch-name">${p.name}</span>${badge}
+      <span class="patch-name">${p.name}</span>${badge}${fixBadge}
       <button class="delete-btn" data-idx="${i}">×</button>
     </div>`;
   }).join('');
