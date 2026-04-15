@@ -2,56 +2,56 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Synth1 Patch Visualizer v1.3</title>
+  <title>Synth1 Patch Visualizer v1.4</title>
   <style>
     * { box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; padding: 16px; background: #0f0f0f; color: #e0e0e0; margin: 0; }
     h2 { color: #4fc3f7; margin: 0 0 16px 0; display: flex; justify-content: space-between; align-items: center; }
-   .master-vol { display: flex; align-items: center; gap: 8px; font-size: 14px; }
-   .master-vol input { width: 120px; }
+  .master-vol { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+  .master-vol input { width: 120px; }
 
-   .container { display: flex; gap: 16px; height: calc(100vh - 80px); }
-   .sidebar { width: 300px; display: flex; flex-direction: column; }
-   .main { flex: 1; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
+  .container { display: flex; gap: 16px; height: calc(100vh - 80px); }
+  .sidebar { width: 300px; display: flex; flex-direction: column; }
+  .main { flex: 1; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
 
     #dropzone { border: 2px dashed #4fc3f7; padding: 20px; text-align: center; margin-bottom: 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
     #dropzone.dragover { background: #1a1a1a; border-color: #29b6f6; }
-   .list-header { display: flex; justify-content: space-between; align-items: center; padding: 0 8px 8px 8px; font-size: 12px; color: #999; }
-   .clear-btn { background: #f44336; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; }
-   .clear-btn:hover { background: #d32f2f; }
+  .list-header { display: flex; justify-content: space-between; align-items: center; padding: 0 8px 8px 8px; font-size: 12px; color: #999; }
+  .clear-btn { background: #f44336; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+  .clear-btn:hover { background: #d32f2f; }
     #patchList { flex: 1; overflow-y: auto; background: #1a1a1a; border-radius: 8px; padding: 8px; }
-   .patch-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; margin: 4px 0; background: #252525; border-radius: 4px; cursor: pointer; transition: 0.1s; font-size: 13px; }
-   .patch-item:hover { background: #333; }
-   .patch-item.active { background: #4fc3f7; color: #000; font-weight: bold; }
-   .patch-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-   .patch-loud { font-size: 10px; color: #f44336; margin: 0 6px; }
-   .patch-quiet { font-size: 10px; color: #ffc107; margin: 0 6px; }
-   .delete-btn { background: transparent; border: none; color: #999; cursor: pointer; font-size: 16px; padding: 0 4px; line-height: 1; }
-   .delete-btn:hover { color: #f44336; }
-   .patch-item.active.delete-btn { color: #000; }
-   .patch-item.active.delete-btn:hover { color: #d32f2f; }
+  .patch-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; margin: 4px 0; background: #252525; border-radius: 4px; cursor: pointer; transition: 0.1s; font-size: 13px; }
+  .patch-item:hover { background: #333; }
+  .patch-item.active { background: #4fc3f7; color: #000; font-weight: bold; }
+  .patch-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .patch-loud { font-size: 10px; color: #f44336; margin: 0 6px; }
+  .patch-quiet { font-size: 10px; color: #ffc107; margin: 0 6px; }
+  .delete-btn { background: transparent; border: none; color: #999; cursor: pointer; font-size: 16px; padding: 0 4px; line-height: 1; }
+  .delete-btn:hover { color: #f44336; }
+  .patch-item.active.delete-btn { color: #000; }
+  .patch-item.active.delete-btn:hover { color: #d32f2f; }
 
-   .section { background: #1a1a1a; border-radius: 8px; padding: 12px; }
-   .section h3 { margin: 0 0 12px 0; color: #4fc3f7; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .section { background: #1a1a1a; border-radius: 8px; padding: 12px; }
+  .section h3 { margin: 0 0 12px 0; color: #4fc3f7; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-   .param-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
-   .param { background: #252525; padding: 8px; border-radius: 4px; }
-   .param-label { font-size: 11px; color: #999; margin-bottom: 4px; }
-   .param-value { font-size: 13px; font-weight: bold; color: #fff; }
-   .param-bar { height: 4px; background: #333; border-radius: 2px; margin-top: 4px; overflow: hidden; }
-   .param-bar-fill { height: 100%; background: #4fc3f7; transition: width 0.1s; }
+  .param-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+  .param { background: #252525; padding: 8px; border-radius: 4px; }
+  .param-label { font-size: 11px; color: #999; margin-bottom: 4px; }
+  .param-value { font-size: 13px; font-weight: bold; color: #fff; }
+  .param-bar { height: 4px; background: #333; border-radius: 2px; margin-top: 4px; overflow: hidden; }
+  .param-bar-fill { height: 100%; background: #4fc3f7; transition: width 0.1s; }
 
-   .keyboard { position: relative; height: 100px; user-select: none; background: #000; border-radius: 4px; overflow: hidden; }
-   .key { position: absolute; cursor: pointer; }
-   .white-key { width: 32px; height: 100px; background: #fff; border-right: 1px solid #ddd; z-index: 1; }
-   .white-key.active { background: #4fc3f7; }
-   .black-key { width: 20px; height: 65px; background: #222; z-index: 2; border-radius: 0 0 3px 3px; }
-   .black-key.active { background: #29b6f6; }
+  .keyboard { position: relative; height: 100px; user-select: none; background: #000; border-radius: 4px; overflow: hidden; }
+  .key { position: absolute; cursor: pointer; }
+  .white-key { width: 32px; height: 100px; background: #fff; border-right: 1px solid #ddd; z-index: 1; }
+  .white-key.active { background: #4fc3f7; }
+  .black-key { width: 20px; height: 65px; background: #222; z-index: 2; border-radius: 0 0 3px 3px; }
+  .black-key.active { background: #29b6f6; }
   </style>
 </head>
 <body>
   <h2>
-    Synth1 Patch Visualizer v1.3
+    Synth1 Patch Visualizer v1.4
     <div class="master-vol">
       Master Vol: <input type="range" id="masterVol" min="0" max="100" value="30">
       <span id="masterVolVal">30%</span>
@@ -102,7 +102,8 @@ let currentPatch = null;
 const activeNotes = new Map();
 let patches = [];
 
-const WAVEFORMS = ['sine','triangle','sawtooth','square'];
+// Synth1準拠: 0=SAW, 1=TRI, 2=SIN, 3=SQR, 4=NOISE
+const WAVEFORMS = ['sawtooth','triangle','sine','square'];
 const FILTER_TYPES = ['LP12','LP24','HP12','BP','Notch'];
 
 document.getElementById('masterVol').oninput = e => {
@@ -165,15 +166,18 @@ function visualizeParams(p) {
       <div class="param-bar"><div class="param-bar-fill" style="width:${Math.max(0,Math.min(100,pct))}%"></div></div>
     </div>`;
 
+  const waveName = v => v===4? 'NOISE' : WAVEFORMS[v] || 'SAW';
+
   osc.innerHTML =
-    param('OSC1 Wave', WAVEFORMS[p.osc1_shape]||'saw', p.osc1_shape, p.osc1_shape/3*100) +
-    param('OSC2 Wave', WAVEFORMS[p.osc2_shape]||'saw', p.osc2_shape, p.osc2_shape/3*100) +
+    param('OSC1 Wave', waveName(p.osc1_shape), p.osc1_shape, p.osc1_shape/4*100) +
+    param('OSC2 Wave', waveName(p.osc2_shape), p.osc2_shape, p.osc2_shape/4*100) +
     param('OSC Mix', (p.osc_mix/1.27).toFixed(0)+'%', p.osc_mix, p.osc_mix/127*100) +
     param('OSC2 Detune', map.detune(p.osc2_fine_tune)+' cent', p.osc2_fine_tune, p.osc2_fine_tune/127*100) +
     param('Unison', p.unison_mode? 'On' : 'Off', p.unison_mode, p.unison_mode*100) +
     param('Uni Detune', p.unison_detune, p.unison_detune, p.unison_detune/127*100);
 
   fa.innerHTML =
+    param('Filter Type', FILTER_TYPES[p.filter_type]||'LP12', p.filter_type, p.filter_type/4*100) +
     param('Cutoff', Math.round(map.cutoff(p.filter_cutoff))+'Hz', p.filter_cutoff, p.filter_cutoff/127*100) +
     param('Resonance', map.q(p.filter_resonance), p.filter_resonance, p.filter_resonance/127*100) +
     param('F.Env Amt', (map.bipolar(p.filter_env_amount)*100).toFixed(0)+'%', p.filter_env_amount, p.filter_env_amount/127*100) +
@@ -192,6 +196,17 @@ function visualizeParams(p) {
     param('Chorus', p.chorus_enable > 64? 'On' : 'Off', p.chorus_enable, p.chorus_enable/127*100);
 }
 
+function createNoiseSource() {
+  const bufferSize = audioContext.sampleRate * 2;
+  const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+  const output = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+  const source = audioContext.createBufferSource();
+  source.buffer = buffer;
+  source.loop = true;
+  return source;
+}
+
 function noteOn(freq, noteName) {
   if (!currentPatch || activeNotes.has(noteName)) return;
   initAudio();
@@ -201,32 +216,38 @@ function noteOn(freq, noteName) {
   const loudness = estimateLoudness(p);
   const autoGain = loudness === 'loud'? 0.3 : loudness === 'quiet'? 1.5 : 1.0;
 
-  const osc1 = audioContext.createOscillator();
-  osc1.type = WAVEFORMS[p.osc1_shape] || 'sawtooth';
-  osc1.frequency.value = freq * Math.pow(2, ((p.osc1_octave||1)-1) + (p.osc1_semitone||0)/12);
+  const osc1 = p.osc1_shape === 4? createNoiseSource() : audioContext.createOscillator();
+  if (p.osc1_shape!== 4) {
+    osc1.type = WAVEFORMS[p.osc1_shape] || 'sawtooth';
+    osc1.frequency.value = freq * Math.pow(2, ((p.osc1_octave||1)-1) + (p.osc1_semitone||0)/12);
+  }
   const osc1Gain = audioContext.createGain();
   osc1Gain.gain.value = Math.max(0.01, (127 - p.osc_mix) / 127 * (p.amp_gain/127) * autoGain);
 
-  const osc2 = audioContext.createOscillator();
-  osc2.type = WAVEFORMS[p.osc2_shape] || 'sawtooth';
-  osc2.frequency.value = freq * Math.pow(2, ((p.osc2_octave||1)-1) + (p.osc2_semitone||0)/12);
-  osc2.detune.value = (p.osc2_fine_tune - 64) + (p.osc2_pitch - 64) * 100;
+  const osc2 = p.osc2_shape === 4? createNoiseSource() : audioContext.createOscillator();
+  if (p.osc2_shape!== 4) {
+    osc2.type = WAVEFORMS[p.osc2_shape] || 'sawtooth';
+    osc2.frequency.value = freq * Math.pow(2, ((p.osc2_octave||1)-1) + (p.osc2_semitone||0)/12);
+    osc2.detune.value = (p.osc2_fine_tune - 64) + (p.osc2_pitch - 64) * 100;
+  }
   const osc2Gain = audioContext.createGain();
   osc2Gain.gain.value = Math.max(0.01, p.osc_mix / 127 * (p.amp_gain/127) * autoGain);
 
   const unisonOscs = [];
   if (p.unison_mode > 0) {
     [-1, 1].forEach(d => {
-      const u = audioContext.createOscillator();
-      u.type = WAVEFORMS[p.osc1_shape] || 'sawtooth';
-      u.frequency.value = osc1.frequency.value;
-      u.detune.value = d * p.unison_detune * 0.5;
+      const u = p.osc1_shape === 4? createNoiseSource() : audioContext.createOscillator();
+      if (p.osc1_shape!== 4) {
+        u.type = WAVEFORMS[p.osc1_shape] || 'sawtooth';
+        u.frequency.value = osc1.frequency.value;
+        u.detune.value = d * p.unison_detune * 0.5;
+      }
       unisonOscs.push(u);
     });
   }
 
   const filter = audioContext.createBiquadFilter();
-  filter.type = 'lowpass';
+  filter.type = p.filter_type === 2? 'highpass' : p.filter_type === 3? 'bandpass' : p.filter_type === 4? 'notch' : 'lowpass';
   filter.Q.value = p.filter_resonance / 127 * 20;
   const baseCutoff = map.cutoff(p.filter_cutoff);
   const egAmt = map.bipolar(p.filter_env_amount) * 8000;
@@ -267,10 +288,17 @@ function noteOff(noteName) {
   if (!n) return;
   const now = audioContext.currentTime;
   const stopTime = now + n.rel;
+  
+  // Filter Release - 現在値固定してからランプ
   n.filter.frequency.cancelScheduledValues(now);
+  n.filter.frequency.setValueAtTime(n.filter.frequency.value, now);
   n.filter.frequency.linearRampToValueAtTime(n.baseCutoff, stopTime);
+  
+  // Amp Release - 現在値固定してからランプ  
   n.ampEnv.gain.cancelScheduledValues(now);
+  n.ampEnv.gain.setValueAtTime(n.ampEnv.gain.value, now);
   n.ampEnv.gain.linearRampToValueAtTime(0, stopTime);
+  
   n.osc1.stop(stopTime); n.osc2.stop(stopTime); n.unisonOscs.forEach(u=>u.stop(stopTime));
   activeNotes.delete(noteName);
 }
@@ -285,7 +313,6 @@ function loadPatches(files) {
     file.text().then(t => {
       try {
         const json = JSON.parse(t);
-        // 10件制限：古いものから削除
         if (patches.length >= 10) patches.shift();
         patches.push({name: file.name.replace('.json',''), data: json});
         renderPatchList();
