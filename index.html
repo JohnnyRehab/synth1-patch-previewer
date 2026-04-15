@@ -2,54 +2,61 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Synth1 Patch Visualizer v1.5</title>
+  <title>Synth1 Patch Visualizer v1.6</title>
   <style>
     * { box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; padding: 16px; background: #0f0f0f; color: #e0e0e0; margin: 0; }
     h2 { color: #4fc3f7; margin: 0 0 16px 0; display: flex; justify-content: space-between; align-items: center; }
- .master-vol { display: flex; align-items: center; gap: 8px; font-size: 14px; }
- .master-vol input { width: 120px; }
+   .master-vol { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+   .master-vol input { width: 120px; }
 
- .container { display: flex; gap: 16px; height: calc(100vh - 80px); }
- .sidebar { width: 300px; display: flex; flex-direction: column; }
- .main { flex: 1; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
+   .container { display: flex; gap: 16px; height: calc(100vh - 80px); }
+   .sidebar { width: 300px; display: flex; flex-direction: column; }
+   .main { flex: 1; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
 
     #dropzone { border: 2px dashed #4fc3f7; padding: 20px; text-align: center; margin-bottom: 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
     #dropzone.dragover { background: #1a1a1a; border-color: #29b6f6; }
- .list-header { display: flex; justify-content: space-between; align-items: center; padding: 0 8px 8px 8px; font-size: 12px; color: #999; }
- .clear-btn { background: #f44336; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; }
- .clear-btn:hover { background: #d32f2f; }
+   .list-header { display: flex; justify-content: space-between; align-items: center; padding: 0 8px 8px 8px; font-size: 12px; color: #999; }
+   .clear-btn { background: #f44336; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+   .clear-btn:hover { background: #d32f2f; }
     #patchList { flex: 1; overflow-y: auto; background: #1a1a1a; border-radius: 8px; padding: 8px; }
- .patch-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; margin: 4px 0; background: #252525; border-radius: 4px; cursor: pointer; transition: 0.1s; font-size: 13px; }
- .patch-item:hover { background: #333; }
- .patch-item.active { background: #4fc3f7; color: #000; font-weight: bold; }
- .patch-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
- .patch-loud { font-size: 10px; color: #f44336; margin: 0 6px; }
- .patch-quiet { font-size: 10px; color: #ffc107; margin: 0 6px; }
- .delete-btn { background: transparent; border: none; color: #999; cursor: pointer; font-size: 16px; padding: 0 4px; line-height: 1; }
- .delete-btn:hover { color: #f44336; }
+   .patch-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; margin: 4px 0; background: #252525; border-radius: 4px; cursor: pointer; transition: 0.1s; font-size: 13px; }
+   .patch-item:hover { background: #333; }
+   .patch-item.active { background: #4fc3f7; color: #000; font-weight: bold; }
+   .patch-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+   .patch-loud { font-size: 10px; color: #f44336; margin: 0 6px; }
+   .patch-quiet { font-size: 10px; color: #ffc107; margin: 0 6px; }
+   .delete-btn { background: transparent; border: none; color: #999; cursor: pointer; font-size: 16px; padding: 0 4px; line-height: 1; }
+   .delete-btn:hover { color: #f44336; }
 
- .section { background: #1a1a1a; border-radius: 8px; padding: 12px; }
- .section h3 { margin: 0 0 12px 0; color: #4fc3f7; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+   .section { background: #1a1a1a; border-radius: 8px; padding: 12px; }
+   .section h3 { margin: 0 0 12px 0; color: #4fc3f7; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
 
- .param-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
- .param { background: #252525; padding: 8px; border-radius: 4px; }
- .param-label { font-size: 11px; color: #999; margin-bottom: 4px; }
- .param-value { font-size: 13px; font-weight: bold; color: #fff; }
- .param-bar { height: 4px; background: #333; border-radius: 2px; margin-top: 4px; overflow: hidden; }
- .param-bar-fill { height: 100%; background: #4fc3f7; transition: width 0.1s; }
+    /* オシロスコープ */
+   .oscilloscope { background: #000; border-radius: 4px; padding: 8px; }
+    #waveCanvas { width: 100%; height: 120px; display: block; }
+   .scope-info { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #999; }
+   .peak-meter { width: 100%; height: 8px; background: #333; border-radius: 4px; margin-top: 4px; overflow: hidden; }
+   .peak-fill { height: 100%; background: linear-gradient(90deg, #4caf50, #ffeb3b, #f44336); transition: width 0.05s; }
 
- .keyboard { position: relative; height: 100px; user-select: none; background: #000; border-radius: 4px; overflow: hidden; }
- .key { position: absolute; cursor: pointer; }
- .white-key { width: 32px; height: 100px; background: #fff; border-right: 1px solid #ddd; z-index: 1; }
- .white-key.active { background: #4fc3f7; }
- .black-key { width: 20px; height: 65px; background: #222; z-index: 2; border-radius: 0 0 3px 3px; }
- .black-key.active { background: #29b6f6; }
+   .param-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+   .param { background: #252525; padding: 8px; border-radius: 4px; }
+   .param-label { font-size: 11px; color: #999; margin-bottom: 4px; }
+   .param-value { font-size: 13px; font-weight: bold; color: #fff; }
+   .param-bar { height: 4px; background: #333; border-radius: 2px; margin-top: 4px; overflow: hidden; }
+   .param-bar-fill { height: 100%; background: #4fc3f7; transition: width 0.1s; }
+
+   .keyboard { position: relative; height: 100px; user-select: none; background: #000; border-radius: 4px; overflow: hidden; }
+   .key { position: absolute; cursor: pointer; }
+   .white-key { width: 32px; height: 100px; background: #fff; border-right: 1px solid #ddd; z-index: 1; }
+   .white-key.active { background: #4fc3f7; }
+   .black-key { width: 20px; height: 65px; background: #222; z-index: 2; border-radius: 0 0 3px 3px; }
+   .black-key.active { background: #29b6f6; }
   </style>
 </head>
 <body>
   <h2>
-    Synth1 Patch Visualizer v1.5
+    Synth1 Patch Visualizer v1.6
     <div class="master-vol">
       Master Vol: <input type="range" id="masterVol" min="0" max="100" value="30">
       <span id="masterVolVal">30%</span>
@@ -70,6 +77,18 @@
     </div>
 
     <div class="main">
+      <div class="section">
+        <h3>OSCILLOSCOPE - 波形モニター</h3>
+        <div class="oscilloscope">
+          <canvas id="waveCanvas"></canvas>
+          <div class="scope-info">
+            <span id="freqDisplay">--- Hz</span>
+            <span id="peakDisplay">-∞ dB</span>
+          </div>
+          <div class="peak-meter"><div class="peak-fill" id="peakFill"></div></div>
+        </div>
+      </div>
+
       <div class="section">
         <h3>KEYBOARD - C3 to B4</h3>
         <div class="keyboard" id="keyboard"></div>
@@ -96,12 +115,63 @@
 let audioContext = null;
 let masterGain = null;
 let masterCompressor = null;
+let analyser = null;
 let currentPatch = null;
 const activeNotes = new Map();
 let patches = [];
 
 const WAVEFORMS = ['sawtooth','triangle','sine','square'];
 const FILTER_TYPES = ['LP12','LP24','HP12','BP12','Notch'];
+
+// オシロスコープ描画
+const canvas = document.getElementById('waveCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = canvas.offsetWidth * 2;
+canvas.height = 240;
+ctx.scale(2, 2);
+
+function drawWaveform() {
+  if (!analyser) {
+    requestAnimationFrame(drawWaveform);
+    return;
+  }
+
+  const bufferLength = analyser.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+  analyser.getByteTimeDomainData(dataArray);
+
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, canvas.width/2, 120);
+
+  // 波形描画
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#4fc3f7';
+  ctx.beginPath();
+
+  const sliceWidth = (canvas.width/2) / bufferLength;
+  let x = 0;
+  for (let i = 0; i < bufferLength; i++) {
+    const v = dataArray[i] / 128.0;
+    const y = v * 60;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+    x += sliceWidth;
+  }
+  ctx.stroke();
+
+  // ピークレベル計算
+  let peak = 0;
+  for (let i = 0; i < bufferLength; i++) {
+    const v = Math.abs(dataArray[i] - 128);
+    if (v > peak) peak = v;
+  }
+  const db = peak > 0? 20 * Math.log10(peak / 128) : -Infinity;
+  document.getElementById('peakDisplay').textContent = db > -60? db.toFixed(1) + ' dB' : '-∞ dB';
+  document.getElementById('peakFill').style.width = Math.max(0, Math.min(100, (db + 60) * 1.67)) + '%';
+
+  requestAnimationFrame(drawWaveform);
+}
+drawWaveform();
 
 document.getElementById('masterVol').oninput = e => {
   document.getElementById('masterVolVal').textContent = e.target.value + '%';
@@ -142,13 +212,20 @@ function initAudio() {
   audioContext = new AudioContext();
   masterGain = audioContext.createGain();
   masterGain.gain.value = 0.3;
+
+  // Analyser for オシロスコープ
+  analyser = audioContext.createAnalyser();
+  analyser.fftSize = 2048;
+
   masterCompressor = audioContext.createDynamicsCompressor();
   masterCompressor.threshold.value = -24;
   masterCompressor.knee.value = 30;
   masterCompressor.ratio.value = 12;
   masterCompressor.attack.value = 0.003;
   masterCompressor.release.value = 0.25;
-  masterCompressor.connect(masterGain).connect(audioContext.destination);
+
+  // 接続: Synth → Compressor → Analyser → MasterGain → 出力
+  masterCompressor.connect(analyser).connect(masterGain).connect(audioContext.destination);
 }
 
 function visualizeParams(p) {
@@ -207,11 +284,11 @@ function createNoiseSource() {
 function createFilter(type, freq, q) {
   const filter = audioContext.createBiquadFilter();
   switch(type) {
-    case 0: filter.type = 'lowpass'; break; // LP12
-    case 1: filter.type = 'lowpass'; break; // LP24は後で2段目追加
-    case 2: filter.type = 'highpass'; break; // HP12
-    case 3: filter.type = 'bandpass'; break; // BP12
-    case 4: filter.type = 'notch'; break; // Notch
+    case 0: filter.type = 'lowpass'; break;
+    case 1: filter.type = 'lowpass'; break;
+    case 2: filter.type = 'highpass'; break;
+    case 3: filter.type = 'bandpass'; break;
+    case 4: filter.type = 'notch'; break;
     default: filter.type = 'lowpass';
   }
   filter.frequency.value = freq;
@@ -224,6 +301,9 @@ function noteOn(freq, noteName) {
   initAudio();
   const now = audioContext.currentTime;
   const p = currentPatch.parameters;
+
+  // 周波数表示更新
+  document.getElementById('freqDisplay').textContent = freq.toFixed(1) + ' Hz';
 
   const loudness = estimateLoudness(p);
   const autoGain = loudness === 'loud'? 0.3 : loudness === 'quiet'? 1.5 : 1.0;
@@ -258,23 +338,20 @@ function noteOn(freq, noteName) {
     });
   }
 
-  // Filter Type対応：LP24は2段直列
   const baseCutoff = map.cutoff(p.filter_cutoff);
   const qVal = p.filter_resonance / 127 * 20;
   const filter1 = createFilter(p.filter_type, baseCutoff, qVal);
   const filters = [filter1];
 
-  if (p.filter_type === 1) { // LP24
+  if (p.filter_type === 1) {
     const filter2 = createFilter(p.filter_type, baseCutoff, qVal);
     filters.push(filter2);
   }
 
   const egAmt = map.bipolar(p.filter_env_amount) * 8000;
-
   const ampEnv = audioContext.createGain();
   ampEnv.gain.value = 0;
 
-  // 接続：OSC → Filter1 → Filter2(あれば) → Amp → Compressor
   osc1.connect(osc1Gain).connect(filters[0]);
   osc2.connect(osc2Gain).connect(filters[0]);
   unisonOscs.forEach(u => u.connect(filters[0]));
@@ -298,7 +375,6 @@ function noteOn(freq, noteName) {
   const peakCutoff = Math.max(20, baseCutoff + egAmt);
   const susCutoff = Math.max(20, baseCutoff + egAmt * fsus);
 
-  // 全Filterに同じEGを適用
   filters.forEach(f => {
     f.frequency.setValueAtTime(baseCutoff, now);
     f.frequency.linearRampToValueAtTime(peakCutoff, now + fatk);
@@ -319,7 +395,6 @@ function noteOff(noteName) {
   const now = audioContext.currentTime;
   const stopTime = now + n.rel;
 
-  // 全FilterにRelease適用
   n.filters.forEach(f => {
     f.frequency.cancelScheduledValues(now);
     f.frequency.setValueAtTime(f.frequency.value, now);
@@ -332,6 +407,10 @@ function noteOff(noteName) {
 
   n.osc1.stop(stopTime); n.osc2.stop(stopTime); n.unisonOscs.forEach(u=>u.stop(stopTime));
   activeNotes.delete(noteName);
+
+  if (activeNotes.size === 0) {
+    document.getElementById('freqDisplay').textContent = '--- Hz';
+  }
 }
 
 function loadPatches(files) {
